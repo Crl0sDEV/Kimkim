@@ -1,49 +1,121 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon } from "lucide-react";
 
 interface BackgroundLayerProps {
-  currentHour: number; // Tumatanggap na tayo ng exact hour (0-23)
+  currentHour: number;
 }
 
-export default function BackgroundLayer({ currentHour }: BackgroundLayerProps) {
-  
-  // 1. Calculate Rotation based on Time
-  // 12 PM (Noon) = 0 degrees (Nasa Tuktok ang Araw)
-  // 6 PM = 90 degrees (Nasa Right/Horizon ang Araw)
-  // 12 AM (Midnight) = 180 degrees (Nasa Tuktok ang Buwan)
-  // 6 AM = 270 degrees (-90) (Nasa Left/Horizon ang Araw)
-  const rotation = (currentHour - 12) * 15;
+type ShootingStar = {
+  id: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  angle: number; 
+};
 
-  // 2. Sky Color Transition (Gradient para mas smooth)
-  // Kukuha tayo ng color base sa oras
+export default function BackgroundLayer({ currentHour }: BackgroundLayerProps) {
+  const [shootingStar, setShootingStar] = useState<ShootingStar | null>(null);
+
+  const rotation = (currentHour - 12) * 15;
   const isNight = currentHour >= 18 || currentHour < 6;
-  const skyColor = isNight ? "#020617" : "#38bdf8"; // Slate-950 (Night) vs Sky-400 (Day)
+  const skyColor = isNight ? "#020617" : "#38bdf8"; 
+
+  useEffect(() => {
+    if (!isNight) return;
+
+    const triggerStar = () => {
+        const id = Date.now();
+        const isLeftToRight = Math.random() > 0.5;
+        const randomY = 10 + Math.random() * 50; 
+        const startY = randomY;
+        const endY = randomY;
+
+        let startX, endX;
+
+        if (isLeftToRight) {
+            startX = -10; 
+            endX = 110;   
+        } else {
+            startX = 110; 
+            endX = -10;   
+        }
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        setShootingStar({ id, startX, startY, endX, endY, angle });
+        setTimeout(() => setShootingStar(null), 2000);
+    };
+
+    const minTime = 60000;
+    const maxTime = 300000;
+    
+    let timeoutId: NodeJS.Timeout;
+
+    const scheduleNextStar = () => {
+        const nextInterval = Math.floor(Math.random() * (maxTime - minTime + 1) + minTime);
+        timeoutId = setTimeout(() => {
+            triggerStar();
+            scheduleNextStar();
+        }, nextInterval);
+    };
+
+    scheduleNextStar();
+    return () => clearTimeout(timeoutId);
+  }, [isNight]);
 
   return (
     <motion.div
       className="absolute inset-0 z-0 overflow-hidden"
       animate={{ backgroundColor: skyColor }}
-      transition={{ duration: 2 }} // Smooth color change
+      transition={{ duration: 2 }} 
     >
-      {/* THE CELESTIAL WHEEL */}
+      {/* --- FIXED SHOOTING STAR --- */}
+      <AnimatePresence>
+        {isNight && shootingStar && (
+            <motion.div
+                key={shootingStar.id}
+                initial={{ 
+                    left: `${shootingStar.startX}%`, 
+                    top: `${shootingStar.startY}%`,
+                    rotate: shootingStar.angle, 
+                    opacity: 0, 
+                    scale: 0.5 
+                }}
+                animate={{ 
+                    left: `${shootingStar.endX}%`, 
+                    top: `${shootingStar.endY}%`, 
+                    opacity: [0, 1, 1, 0], 
+                    scale: [0.8, 1, 0.8] 
+                }}
+                transition={{ 
+                    duration: 2, 
+                    ease: "linear", 
+                    times: [0, 0.1, 0.9, 1] 
+                }}
+                className="absolute z-10 h-0.5 w-37.5 origin-left blur-[0.5px]"
+                style={{
+                    
+                    background: 'linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255, 255, 255, 1) 100%)'
+                }}
+            >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full blur-[2px] shadow-[0_0_10px_rgba(255,255,255,1)]" />
+            </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
-        // ADJUSTMENT: Tinaas ko yung 'bottom' value para lumitaw sa screen yung Sun/Moon
-        // Dati kasi baka sobrang baba kaya natatago.
         className="absolute left-1/2 bottom-[-80vh] w-[180vh] h-[180vh] -translate-x-1/2 flex justify-center items-center rounded-full border border-white/5"
         animate={{ rotate: rotation }}
-        transition={{ 
-            type: "spring", 
-            stiffness: 20, 
-            damping: 15 
-        }}
+        transition={{ type: "spring", stiffness: 20, damping: 15 }}
         style={{ transformOrigin: "center center" }}
       >
-        {/* --- SUN (Top of Wheel) --- */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-             {/* Counter-rotate para laging upright ang icon kahit umiikot ang wheel */}
             <motion.div animate={{ rotate: -rotation }} transition={{ type: "spring" }}>
                 <div className="relative">
                     <div className="absolute inset-0 bg-yellow-400 blur-[80px] opacity-60 rounded-full scale-150"></div>
@@ -51,10 +123,7 @@ export default function BackgroundLayer({ currentHour }: BackgroundLayerProps) {
                 </div>
             </motion.div>
         </div>
-
-        {/* --- MOON (Bottom of Wheel) --- */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex flex-col items-center">
-             {/* Counter-rotate din para upright */}
              <motion.div animate={{ rotate: -rotation }} transition={{ type: "spring" }}>
                 <div className="relative">
                     <div className="absolute inset-0 bg-blue-100 blur-[60px] opacity-30 rounded-full scale-150"></div>
@@ -62,7 +131,6 @@ export default function BackgroundLayer({ currentHour }: BackgroundLayerProps) {
                 </div>
             </motion.div>
         </div>
-
       </motion.div>
     </motion.div>
   );
