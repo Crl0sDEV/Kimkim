@@ -34,7 +34,7 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
       setHasSent(true);
       setThought("");
       onSuccess(); 
-      setTimeout(() => setHasSent(false), 4000); // 4 seconds para mabasa yung success msg
+      setTimeout(() => setHasSent(false), 4000); 
     } catch (error) {
         console.error(error);
       alert("May problema sa pagpapadala. Subukan muli.");
@@ -61,8 +61,8 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
               value={thought}
               onChange={(e) => setThought(e.target.value)}
               disabled={isSubmitting}
-              // TAGALOG PLACEHOLDER
-              placeholder="Ano ang matagal mo nang kinikimkim?"
+              // TAGALOG PLACEHOLDER - Fits "Tinig"
+              placeholder="Anong tinig ang nais mong pakawalan?"
               maxLength={280}
               className="w-full p-6 bg-white/40 backdrop-blur-md border border-white/50 rounded-xl resize-none outline-none text-lg text-slate-800 placeholder:text-slate-500/70 focus:border-slate-400 focus:bg-white/60 transition-all duration-500 font-light shadow-lg"
               rows={4}
@@ -78,7 +78,7 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
                     <Loader2 size={14} className="animate-spin" />
                 ) : (
                     // TAGALOG BUTTON
-                    <>Pakawalan <Send size={14} /></>
+                    <>Iparinig <Send size={14} /></>
                 )}
               </button>
             </div>
@@ -92,9 +92,9 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
             className="text-slate-600 font-mono text-sm tracking-wide"
           >
             <Sparkles className="w-8 h-8 mx-auto mb-4 text-sky-500" />
-            {/* TAGALOG SUCCESS MESSAGE */}
-            <p>Malaya na ang iyong lihim.</p>
-            <p className="text-xs opacity-60 mt-1">Wala na ang bigat.</p>
+            {/* TAGALOG SUCCESS MESSAGE - POETIC */}
+            <p>Umaalingawngaw na sa kalawakan.</p>
+            <p className="text-xs opacity-60 mt-1">Narinig ka na.</p>
           </motion.div>
         )}
       </AnimatePresence>

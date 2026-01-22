@@ -72,12 +72,12 @@ export default function Home() {
         onHoverStar={setHoveredStar} 
       />
 
-      {/* NIGHT STATUS: Mas malalim na Filipino text */}
+      {/* NIGHT STATUS: "DALUYONG" (Frequency/Wave) fits the "Tinig" theme */}
       {isNight && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 1 } }} className="absolute bottom-10 right-10 z-50 text-right pointer-events-none">
           <div className="text-white/30 font-mono text-[10px] tracking-widest space-y-1 uppercase">
-            <p>DIWA: NAKIKINIG</p>
-            <p>Pakinggan ang mga lihim</p>
+            <p>DALUYONG: NAKIKINIG</p>
+            <p>Pakinggan ang himig</p>
           </div>
         </motion.div>
       )}
@@ -90,14 +90,14 @@ export default function Home() {
 
       <div className="relative z-40 w-full max-w-md px-6 text-center pointer-events-none">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-12">
-          {/* MAIN TITLE */}
+          {/* MAIN TITLE: T I N I G */}
           <h1 className={`text-xl md:text-2xl tracking-[0.8em] font-bold flex items-center justify-center gap-3 transition-colors duration-1000 ${isNight ? "text-white/90" : "text-black/80"}`}>
-            K I M K I M
+            T I N I G
           </h1>
           
           {/* TAGLINE: The emotional hook */}
           <p className={`mt-4 text-[10px] md:text-xs font-mono tracking-widest uppercase opacity-60 transition-colors duration-1000 ${isNight ? "text-white/50" : "text-black/50"}`}>
-            {isNight ? "Ang mga salitang hindi masabi" : "Pakawalan ang iyong dinadala"}
+            {isNight ? "Mga bulong na naging bituin" : "Isigaw mo sa walang hanggan"}
           </p>
         </motion.div>
 
