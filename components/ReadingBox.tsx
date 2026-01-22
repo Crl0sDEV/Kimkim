@@ -14,7 +14,7 @@ type Star = {
 interface ReadingBoxProps {
   isNight: boolean;
   hoveredStar: Star | null;
-  onUpdateStar: (starId: string, newLikes: number) => void; // Callback to update parent state
+  onUpdateStar: (starId: string, newLikes: number) => void;
 }
 
 export default function ReadingBox({ isNight, hoveredStar, onUpdateStar }: ReadingBoxProps) {
@@ -26,12 +26,9 @@ export default function ReadingBox({ isNight, hoveredStar, onUpdateStar }: Readi
     const newLikes = currentLikes + 1;
     setReactedStars((prev) => new Set(prev).add(starId));
     
-    // 1. Update UI agad (Optimistic)
     onUpdateStar(starId, newLikes);
 
-    // 2. Secure RPC Call (Backend)
     try {
-      // Dito na tayo tatawag sa FUNCTION, hindi sa Table update
       await supabase.rpc('increment_likes', { row_id: starId });
     } catch (err) {
       console.error("Error reacting", err);
@@ -70,8 +67,8 @@ export default function ReadingBox({ isNight, hoveredStar, onUpdateStar }: Readi
                       : "group-hover:text-red-300"
                   }`}
                 />
-                <span className="font-bold tracking-wider">
-                  {hoveredStar.likes} {hoveredStar.likes === 1 ? "Resonate" : "Resonates"}
+                <span className="font-bold tracking-wider uppercase">
+                  {hoveredStar.likes} {hoveredStar.likes <= 1 ? "Nakadama" : "Nakadama"}
                 </span>
               </button>
             </div>
