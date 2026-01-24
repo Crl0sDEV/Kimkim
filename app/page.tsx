@@ -9,6 +9,7 @@ import ReadingBox from "@/components/ReadingBox";
 import InputForm from "@/components/InputForm";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundMusic from "@/components/BackgroundMusic";
+import CosmicRipple  from "@/components/CosmicRipple";
 
 type Star = {
   id: string;
@@ -65,6 +66,7 @@ export default function Home() {
       
       <BackgroundMusic />
       <BackgroundLayer currentHour={preciseHour} />
+      <CosmicRipple/>
 
       <StarLayer 
         isNight={isNight} 
