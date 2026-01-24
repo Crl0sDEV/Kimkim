@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -23,66 +23,42 @@ interface StarLayerProps {
 
 // --- SUB-COMPONENT: STAR ITEM (With Final Flicker Logic) ---
 const StarItem = ({ star, onHover }: { star: Star; onHover: (s: Star) => void }) => {
-  
-  // 1. DETERMINISTIC SPEED
-  // Base speed (Normal life)
   const seed = parseInt(star.id.slice(-2), 16) || 0;
   const normalDuration = 2 + (seed / 255) * 3; 
 
-  // 2. ADVANCED LIFE CALCULATION
   const { lifeForce, isCritical } = useMemo(() => {
     const now = new Date().getTime();
     const created = new Date(star.created_at).getTime();
-    const hoursOld = (now - created) / (1000 * 60 * 60); // Hours since creation
-    const maxLife = 72; // 72 Hours Lifespan
+    const hoursOld = (now - created) / (1000 * 60 * 60); 
+    const maxLife = 72; 
     
-    // Remaining hours
     const hoursLeft = maxLife - hoursOld;
-
-    // Fading Formula: 1.0 (Fresh) -> 0.0 (Dead)
     const lf = Math.max(0, 1 - (hoursOld / maxLife));
-
-    // CRITICAL CONDITION:
-    // Kapag 2 hours (or less) na lang ang natitira, "Critical" na siya.
-    // Pwede mong baguhin yung '2' kung gusto mo mas maaga o mas late mag-flicker.
     const critical = hoursLeft <= 2 && hoursLeft > 0;
 
     return { lifeForce: lf, isCritical: critical };
   }, [star.created_at]);
 
-  // Kung patay na, wag i-render
   if (lifeForce <= 0) return null;
 
   return (
     <motion.div
       onMouseEnter={() => onHover(star)}
       initial={{ opacity: 0, scale: 0 }}
-      
-      // --- DYNAMIC ANIMATION ---
       animate={{ 
         opacity: isCritical 
-          ? [0.2, 1, 0.1, 0.8, 0] // VIOLENT FLICKER: Magulo ang opacity pag critical
-          : [lifeForce * 0.4, lifeForce, lifeForce * 0.4], // NORMAL: Smooth pulse
-        
+          ? [0.2, 1, 0.1, 0.8, 0] 
+          : [lifeForce * 0.4, lifeForce, lifeForce * 0.4], 
         scale: isCritical
-           ? [lifeForce * 0.8, lifeForce * 1.2, lifeForce * 0.9] // Pulsing size pag critical
-           : lifeForce // Normal scale
+           ? [lifeForce * 0.8, lifeForce * 1.2, lifeForce * 0.9] 
+           : lifeForce 
       }}
-      
       transition={{
-        // DURATION LOGIC:
-        // Pag Critical: 0.15s (Sobrang bilis/Strobe effect)
-        // Pag Normal: Base sa calculated duration (2s - 5s)
         duration: isCritical ? 0.15 : normalDuration,
-        
         repeat: Infinity,
-        ease: isCritical ? "linear" : "easeInOut", // Linear para mas mukhang robotic/erratic pag flicker
+        ease: isCritical ? "linear" : "easeInOut", 
       }}
-      
       style={{ left: `${star.pos_x}%`, top: `${star.pos_y}%` }}
-      
-      // Style changes:
-      // Pag Critical: Nagiging 'Reddish-White' para mukhang unstable (optional, remove 'shadow-red' if ayaw mo)
       className={`absolute w-2 h-2 rounded-full cursor-pointer hover:scale-150 transition-transform duration-300 z-20 ${
           isCritical ? "bg-red-100 shadow-[0_0_15px_rgba(255,200,200,0.8)]" : "bg-white hover:bg-yellow-100"
       }`}
@@ -91,6 +67,8 @@ const StarItem = ({ star, onHover }: { star: Star; onHover: (s: Star) => void })
 };
 
 export default function StarLayer({ isNight, mounted, onHoverStar, stars, setStars }: StarLayerProps) {
+  // State para sa Mouse Position (in Percentage para match sa stars)
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
   
   useEffect(() => {
     if (isNight && mounted) {
@@ -109,16 +87,66 @@ export default function StarLayer({ isNight, mounted, onHoverStar, stars, setSta
     }
   }, [isNight, mounted, setStars]);
 
+  // Handle Mouse Move to update position
+  const handleMouseMove = (e: React.MouseEvent) => {
+    // I-convert natin ang Mouse Pixels to Percentage relative sa window size
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    setMousePos({ x, y });
+  };
+
   if (!isNight) return null;
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
+    <div 
+        className="absolute inset-0 z-0 overflow-hidden" 
+        onMouseMove={handleMouseMove} // Listen for mouse movement
+        onMouseLeave={() => setMousePos({ x: -100, y: -100 })} // Hide lines pag lumabas ang mouse
+    >
+      
+      {/* --- CONSTELLATION SVG LAYER (Background Lines) --- */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+        {stars.map((star) => {
+            // Calculate Distance between Mouse and Star (Pythagorean Theorem)
+            // Simplified: Assuming square aspect ratio for speed (pero oks lang visually)
+            const dx = star.pos_x - mousePos.x;
+            const dy = star.pos_y - mousePos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // THRESHOLD: Kung gaano kalapit bago mag-connect (15% ng screen size)
+            const maxDist = 15; 
+
+            // Kung pasok sa range, draw line
+            if (dist < maxDist) {
+                // Calculate opacity: Mas malapit, mas malinaw
+                const opacity = 1 - (dist / maxDist);
+                
+                return (
+                    <line
+                        key={`line-${star.id}`}
+                        x1={`${mousePos.x}%`}
+                        y1={`${mousePos.y}%`}
+                        x2={`${star.pos_x}%`}
+                        y2={`${star.pos_y}%`}
+                        stroke="white"
+                        strokeWidth="0.5"
+                        strokeOpacity={opacity * 0.4} // Medyo transparent lang (0.4 max)
+                        strokeLinecap="round"
+                    />
+                );
+            }
+            return null;
+        })}
+      </svg>
+
       <AnimatePresence>
         {stars.map((star) => (
           <StarItem key={star.id} star={star} onHover={onHoverStar} />
         ))}
       </AnimatePresence>
-      <div className="absolute inset-0 z-10" onClick={() => onHoverStar(null)} />
+      
+      {/* Click overlay to close reading box */}
+      <div className="absolute inset-0 z-0" onClick={() => onHoverStar(null)} />
     </div>
   );
 }
