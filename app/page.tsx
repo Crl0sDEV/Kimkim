@@ -8,6 +8,7 @@ import StarLayer from "@/components/StarLayer";
 import ReadingBox from "@/components/ReadingBox";
 import InputForm from "@/components/InputForm";
 import BackgroundLayer from "@/components/BackgroundLayer";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 type Star = {
   id: string;
@@ -62,6 +63,7 @@ export default function Home() {
   return (
     <main className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center">
       
+      <BackgroundMusic />
       <BackgroundLayer currentHour={preciseHour} />
 
       <StarLayer 
@@ -91,7 +93,7 @@ export default function Home() {
       <div className="relative z-40 w-full max-w-md px-6 text-center pointer-events-none">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-12">
           {/* MAIN TITLE: T I N I G */}
-          <h1 className={`text-xl md:text-2xl tracking-[0.8em] font-bold flex items-center justify-center gap-3 transition-colors duration-1000 ${isNight ? "text-white/90" : "text-black/80"}`}>
+          <h1 className={`text-xl md:text-2xl tracking-[0.8em] pl-[0.8em] font-bold flex items-center justify-center gap-3 transition-colors duration-1000 ${isNight ? "text-white/90" : "text-black/80"}`}>
             T I N I G
           </h1>
           
