@@ -8,7 +8,7 @@ const PLAYLIST = [
   { title: "Tadhana - UDD", src: "/tadhana.mp3" },
   { title: "Pagsamo - Arthur Nery", src: "/pagsamo.mp3" },
   { title: "Glimpse of Us - Joji", src: "/glimpse.mp3" },
-  { title: "Burnout - UDD", src: "/burnout.mp3" },
+  { title: "Burnout - Johnoy Danao", src: "/burnout.mp3" },
   { title: "Those Eyes - New West", src: "/those-eyes.mp3" },
   { title: "Palagi - TJ Monterde", src: "/palagi.mp3" },
 ];
