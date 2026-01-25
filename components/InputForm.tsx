@@ -5,13 +5,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, Sparkles, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
+import { useToast } from "@/context/ToastContext";
+
 interface InputFormProps {
   isNight: boolean;
   onSuccess: () => void;
 }
 
+// 1. LISTAHAN NG BAWAL (Filter List)
+const BAD_WORDS = [
+  // Tagalog
+  "gago", "tanga", "bobo", "putangina", "puta", "gaga", 
+  "tangina", "ulol", "olop", "kantot", "iyot", "bayot", 
+  "supot", "tarantado", "hindot", "puke", "pepe", "tite", 
+  "etits", "burat", "kupal", "hayop", "demonyo", "punyeta",
+  "kinginamo","tt", "bisakol",
+  // English
+  "fuck", "shit", "bitch", "asshole", "bullshit", "sex", "dick"
+];
+
 const PROMPTS = [
-  "Anong tinig ang nais mong pakawalan?",
+  "Anong tinig ang nais mong pakawalan?", 
   "Sino ang nami-miss mo ngayon?",
   "Ano ang mga salitang hindi mo masabi sa kanya?",
   "Anong pangarap ang kailangan mong bitawan?",
@@ -30,6 +44,8 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
+  const { showToast } = useToast();
+
   useEffect(() => {
     setIsClient(true);
     setCurrentPromptIndex(Math.floor(Math.random() * PROMPTS.length));
@@ -39,9 +55,37 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
     setCurrentPromptIndex((prev) => (prev + 1) % PROMPTS.length);
   };
 
+  // --- UPDATED: MATALINONG CHECKER ---
+  const containsBadWords = (text: string) => {
+    const lowerText = text.toLowerCase();
+
+    // Loop tayo sa bawat bad word
+    return BAD_WORDS.some((word) => {
+        // 1. I-convert ang word into REGEX Pattern
+        // Halimbawa: "gago" -> nagiging "g+a+g+o+"
+        // Ibig sabihin: "One or more G, followed by one or more A..."
+        const regexPattern = word
+            .split('') // Hiniwalay per letter ['g', 'a', 'g', 'o']
+            .map(char => `${char}+`) // Dinagdagan ng '+' bawat isa
+            .join(''); // Pinagsama ulit: "g+a+g+o+"
+
+        // 2. Gumawa ng Regex Object
+        const regex = new RegExp(regexPattern, 'i'); // 'i' means case-insensitive
+
+        // 3. I-test kung nasa text
+        return regex.test(lowerText);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!thought.trim() || isSubmitting) return;
+
+    // --- CHECKPOINT ---
+    if (containsBadWords(thought)) {
+        showToast("Paalala: Panatilihing dalisay ang ating kalawakan.", "error");
+        return; 
+    }
 
     setIsSubmitting(true);
 
@@ -60,7 +104,7 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
       onSuccess(); 
       setTimeout(() => setHasSent(false), 4000); 
     } catch (error) {
-        console.error(error);
+      console.error(error);
       alert("May problema sa pagpapadala. Subukan muli.");
     } finally {
       setIsSubmitting(false);
@@ -68,7 +112,6 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
   };
 
   if (isNight) return null;
-
   if (!isClient) return null;
 
   return (
@@ -83,7 +126,6 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
             onSubmit={handleSubmit}
             className="flex flex-col gap-3 w-full"
           >
-            {/* --- PROMPT LABEL & SHUFFLE --- */}
             <div className="flex items-center justify-between px-2">
                 <motion.label 
                     key={currentPromptIndex}
@@ -108,7 +150,6 @@ export default function InputForm({ isNight, onSuccess }: InputFormProps) {
               value={thought}
               onChange={(e) => setThought(e.target.value)}
               disabled={isSubmitting}
-              // Placeholder is simpler now since we have the label
               placeholder="Ikwento mo rito..."
               maxLength={280}
               className="w-full p-6 bg-white/60 backdrop-blur-md border border-white/50 rounded-xl resize-none outline-none text-lg text-slate-800 placeholder:text-slate-500/50 focus:border-slate-400 focus:bg-white/80 transition-all duration-500 font-light shadow-lg"

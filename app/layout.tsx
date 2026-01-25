@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 
+import { ToastProvider } from "@/context/ToastContext";
+
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["300", "400", "700"],
@@ -34,8 +36,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fil">
+      
       <body className={`${montserrat.variable} font-sans antialiased bg-black text-white`}>
+      <ToastProvider>
         {children}
+        </ToastProvider>
       </body>
     </html>
   );

@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useSyncExternalStore } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabaseClient";
 
+import SplashScreen from "@/components/SplashScreen";
 import StarLayer from "@/components/StarLayer";
 import ReadingBox from "@/components/ReadingBox";
 import InputForm from "@/components/InputForm";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundMusic from "@/components/BackgroundMusic";
-import CosmicRipple  from "@/components/CosmicRipple";
+import CosmicRipple from "@/components/CosmicRipple";
 
 type Star = {
   id: string;
@@ -28,6 +29,9 @@ export default function Home() {
   const [stars, setStars] = useState<Star[]>([]);
   const [hoveredStar, setHoveredStar] = useState<Star | null>(null);
   const [now, setNow] = useState(new Date());
+  
+  // SPLASH STATE
+  const [showSplash, setShowSplash] = useState(true);
 
   const mounted = useMounted();
   
@@ -59,12 +63,24 @@ export default function Home() {
      }
   }
 
+  // HANDLE ENTER (Galing sa Splash Screen)
+  const handleEnter = () => {
+    setShowSplash(false);
+  };
+
   if (!mounted) return null;
 
   return (
     <main className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center">
       
-      <BackgroundMusic />
+      {/* 1. SPLASH SCREEN (Nasa ibabaw ng lahat) */}
+      <AnimatePresence>
+        {showSplash && <SplashScreen onEnter={handleEnter} />}
+      </AnimatePresence>
+
+      {/* 2. MUSIC (Mag-uumpisa lang kapag nawala na ang Splash Screen) */}
+      <BackgroundMusic startPlaying={!showSplash} />
+
       <BackgroundLayer currentHour={preciseHour} />
       <CosmicRipple/>
 
@@ -76,7 +92,7 @@ export default function Home() {
         onHoverStar={setHoveredStar} 
       />
 
-      {/* NIGHT STATUS: "DALUYONG" (Frequency/Wave) fits the "Tinig" theme */}
+      {/* NIGHT STATUS */}
       {isNight && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 1 } }} className="absolute bottom-10 right-10 z-50 text-right pointer-events-none">
           <div className="text-white/30 font-mono text-[10px] tracking-widest space-y-1 uppercase">
@@ -94,12 +110,12 @@ export default function Home() {
 
       <div className="relative z-40 w-full max-w-md px-6 text-center pointer-events-none">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-12">
-          {/* MAIN TITLE: T I N I G */}
+          {/* MAIN TITLE */}
           <h1 className={`text-xl md:text-2xl tracking-[0.8em] pl-[0.8em] font-bold flex items-center justify-center gap-3 transition-colors duration-1000 ${isNight ? "text-white/90" : "text-black/80"}`}>
             T I N I G
           </h1>
           
-          {/* TAGLINE: The emotional hook */}
+          {/* TAGLINE */}
           <p className={`mt-4 text-[10px] md:text-xs font-mono tracking-widest uppercase opacity-60 transition-colors duration-1000 ${isNight ? "text-white/50" : "text-black/50"}`}>
             {isNight ? "Mga bulong na naging bituin" : "Isigaw mo sa walang hanggan"}
           </p>
