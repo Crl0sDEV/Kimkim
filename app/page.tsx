@@ -11,6 +11,7 @@ import InputForm from "@/components/InputForm";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import CosmicRipple from "@/components/CosmicRipple";
+import DailyQuote from "@/components/DailyQuote";
 
 type Star = {
   id: string;
@@ -72,6 +73,8 @@ export default function Home() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center">
+
+      <DailyQuote />
       
       {/* 1. SPLASH SCREEN (Nasa ibabaw ng lahat) */}
       <AnimatePresence>
