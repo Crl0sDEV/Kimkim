@@ -44,14 +44,14 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  //const hour = now.getHours();
-  //const minute = now.getMinutes();
-  //const preciseHour = hour + (minute / 60); 
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const preciseHour = hour + (minute / 60); 
 
-  //const isNight = hour >= 18 || hour < 6;
+  const isNight = hour >= 18 || hour < 6;
 
-  const preciseHour = 20;
-  const isNight = true;
+  //const preciseHour = 20;
+  //const isNight = true;
 
   const handleUpdateStarLikes = (starId: string, newLikes: number) => {
     setStars((prev) => prev.map((s) => (s.id === starId ? { ...s, likes: newLikes } : s)));
