@@ -35,12 +35,6 @@ function randInt(min: number, max: number) {
   return Math.floor(rand(min, max + 1));
 }
 
-/**
- * Silhouette bird (side view) with REAL flapping (2-frame):
- * - Frame A: wings UP
- * - Frame B: wings DOWN (tucked near body)
- * Crossfade between frames for a strong flap illusion.
- */
 function BirdSilhouette({
   className,
   flapSpeed = 0.75,
@@ -55,8 +49,7 @@ function BirdSilhouette({
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      {/* WINGS: 2 FRAMES */}
-      {/* UP frame */}
+
       <motion.g
         initial={false}
         animate={{ opacity: [1, 0, 1], y: [0, 2, 0] }}
@@ -74,7 +67,6 @@ function BirdSilhouette({
         />
       </motion.g>
 
-      {/* DOWN frame */}
       <motion.g
         initial={false}
         animate={{ opacity: [0, 1, 0], y: [10, 0, 10] }}
@@ -92,7 +84,6 @@ function BirdSilhouette({
         />
       </motion.g>
 
-      {/* BODY (always on top) */}
       <path
         d="M54 124c24-30 86-36 126-18 16 7 30 22 36 38-36 6-76 8-116 8-28 0-44-2-46-4z"
         fill="currentColor"
